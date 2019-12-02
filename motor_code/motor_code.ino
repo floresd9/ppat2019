@@ -49,7 +49,7 @@ void loop() {
   if (analogRead(buttonPin) == 0) {
     // Step 1: lower wheel onto book
     Serial.println("Hello");
-    for (int degree = 120; degree > 20; degree--) {
+    for (int degree = 120; degree > 30; degree--) {
       pwm.setPWM(arm1, 0, convert(degree));
       pwm.setPWM(arm2, 0, convert(180-degree));
     }
@@ -62,9 +62,9 @@ void loop() {
     delay(1000);
     Serial.println("Here");
     // Step 3: Turn wheel
-    motor->setSpeed(125);
+    motor->setSpeed(150);
     motor->run(FORWARD);
-    delay(750);
+    delay(1000);
     motor->setSpeed(0);
     delay(1000);
     Serial.println("Why");
@@ -86,7 +86,7 @@ void loop() {
     delay(1000);
     Serial.println("Work?");
     // Step 6: raise wheel:
-    for (int degree = 20; degree < 120; degree++) {
+    for (int degree = 30; degree < 120; degree++) {
       pwm.setPWM(arm1, 0, convert(degree));
       pwm.setPWM(arm2, 0, convert(180-degree));
     }
