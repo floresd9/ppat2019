@@ -19,9 +19,22 @@ uint8_t arm2 = 4;
 uint8_t page_flip = 2;
 uint8_t book_holder1 = 3;
 uint8_t book_holder2 = 7;
-const int buttonPin = A0;
+const int buttonPin = A1;
 
-int pos = 0;
+// angle variables: base positions
+int arm1_up = 60;
+int page_flip_start = 180;
+int book_holder_up = 130;
+
+//angle variables: intermediate positions
+int arm1_down = 160;
+int book_holder_down = 0;
+int arm1_slightly_raised = 100;
+int page_flip_end = 45;
+
+//wheel variables
+int turn_speed = 225;
+int turn_duration = 400;
 
 int convert(int degrees){
   return map(degrees, 0, 180, 150, 600);
@@ -38,58 +51,70 @@ void setup() {
   // you get the frequency you're expecting!
   pwm.setOscillatorFrequency(27000000);  // The int.osc. is closer to 27MHz  
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~60 Hz updates
-  pwm.setPWM(arm1, 0, convert(30));
-  pwm.setPWM(arm2, 0, convert(150));
-  pwm.setPWM(page_flip, 0, convert(180));
-  pwm.setPWM(book_holder1, 0, convert(70));
-  pwm.setPWM(book_holder2, 0, convert(70));
+  pwm.setPWM(arm1, 0, convert(arm1_up));
+  pwm.setPWM(arm2, 0, convert(180-arm1_up));
+  pwm.setPWM(page_flip, 0, convert(page_flip_start));
+  pwm.setPWM(book_holder1, 0, convert(book_holder_up));
+  pwm.setPWM(book_holder2, 0, convert(book_holder_up));
 }
 
 void loop() {
   Serial.println(analogRead(buttonPin));
   if (analogRead(buttonPin) == 0) {
+    
     // Step 1: lower wheel onto book
-    Serial.println("Hello");
-    for (int degree = 30; degree < 120; degree++) {
+    for (int degree = arm1_up; degree < arm1_down; degree++) {
       pwm.setPWM(arm1, 0, convert(degree));
       pwm.setPWM(arm2, 0, convert(180-degree));
     }
     delay(1000);
-    Serial.println("Hi");
-    // Step 2: raise book holder block
-    for (int degree = 70; degree > 0; degree--) {
+
+    // Step 2: remove book holder from turning page
+    for (int degree = book_holder_up; degree > book_holder_down; degree--) {
       pwm.setPWM(book_holder1, 0, convert(degree));
-      pwm.setPWM(book_holder2, 0, convert(degree));
     }
     delay(1000);
-    Serial.println("Here");
+
     // Step 3: Turn wheel
-    motor->setSpeed(150);
+    motor->setSpeed(turn_speed);
     motor->run(FORWARD);
-    delay(1000);
+    delay(turn_duration);
     motor->setSpeed(0);
+    
+    // Step 3b: slightly raise wheel to allow page to flip with less resistance
+    for (int degree = arm1_down; degree > arm1_slightly_raised; degree--) {
+      pwm.setPWM(arm1, 0, convert(degree));
+      pwm.setPWM(arm2, 0, convert(180-degree));
+    }
     delay(1000);
-    Serial.println("Why");
+
     // Step 4: flip page turer
-    for (int degree = 180; degree > 45; degree--) {
+    for (int degree = page_flip_start; degree > page_flip_end; degree--) {
       pwm.setPWM(page_flip, 0, convert(degree));
     }
-    delay(1000);
-    // Step 4b: Flip page turner back to reset
-    for (int degree = 45; degree < 180; degree++) {
-      pwm.setPWM(page_flip, 0, convert(degree));
+    delay(300);
+
+    // Step 4b: remove book holder from side catching turned page
+    for (int degree = book_holder_up; degree > book_holder_down; degree--) {
+      pwm.setPWM(book_holder2, 0, convert(degree));
     }
-    delay(2000);
-    Serial.println("No");
-    // Step 5: lower book holder block
-    for (int degree = 0; degree < 70; degree++) {
+    delay(500);
+    
+    // Step 5: re-place both book holders, having caught the turned page
+    for (int degree = book_holder_down; degree < book_holder_up; degree++) {
       pwm.setPWM(book_holder1, 0, convert(degree));
       pwm.setPWM(book_holder2, 0, convert(degree));
     }
     delay(1000);
-    Serial.println("Work?");
-    // Step 6: raise wheel:
-    for (int degree = 120; degree > 30; degree--) {
+    
+    // Step 6: Flip page turner back to reset
+    for (int degree = page_flip_end; degree < page_flip_start; degree++) {
+      pwm.setPWM(page_flip, 0, convert(degree));
+    }
+    delay(1000);
+
+    // Step 7: raise wheel:
+    for (int degree = arm1_slightly_raised; degree > arm1_up; degree--) {
       pwm.setPWM(arm1, 0, convert(degree));
       pwm.setPWM(arm2, 0, convert(180-degree));
     }
