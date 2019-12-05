@@ -3,7 +3,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Servo.h>
 
-
+// Initialize variables
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 Adafruit_DCMotor *motor = AFMS.getMotor(2);
@@ -13,7 +13,7 @@ Adafruit_DCMotor *motor = AFMS.getMotor(2);
 #define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
 #define SERVO_FREQ 60 // Analog servos run at ~60 Hz updates
 
-// our servo # counter
+// Initialize Servo, DC, and button pins
 uint8_t arm1 = 0;
 uint8_t arm2 = 4;
 uint8_t page_flip = 2;
@@ -21,22 +21,30 @@ uint8_t book_holder1 = 3;
 uint8_t book_holder2 = 7;
 const int buttonPin = A1;
 
-// angle variables: base positions
+// Angle variables: base positions
 int arm1_up = 60;
 int page_flip_start = 180;
 int book_holder_up = 130;
 
-//angle variables: intermediate positions
+// Angle variables: intermediate positions
 int arm1_down = 160;
 int book_holder_down = 0;
 int arm1_slightly_raised = 100;
 int page_flip_end = 45;
 
-//wheel variables
+// Wheel variables
 int turn_speed = 225;
 int turn_duration = 400;
 
+// Helper funciton(s):
 int convert(int degrees){
+  /*
+   * Convert given degrees to valid pwm units for Servo motor use
+   * 
+   * degrees: integer between 0 and 360 representing degree desired
+   * 
+   * return map to the corresponding pwm output
+   */
   return map(degrees, 0, 180, 150, 600);
 }
 
