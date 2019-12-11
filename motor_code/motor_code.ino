@@ -29,11 +29,11 @@ int book_holder_up = 130;
 // Angle variables: intermediate positions
 int arm1_down = 140;
 int book_holder_down = 0;
-int arm1_slightly_raised = 100;
+int arm1_slightly_raised = 110;
 int page_flip_end = 45;
 
 // Wheel variables
-int turn_speed = 250;
+int turn_speed = 225;
 int turn_duration = 400;
 
 // Helper funciton(s):
@@ -88,6 +88,7 @@ void loop() {
     motor->run(FORWARD);
     delay(turn_duration);
     motor->setSpeed(0);
+    delay(1000);
     
     // Step 4: slightly raise wheel to allow page to flip with less resistance
     for (int degree = arm1_down; degree > arm1_slightly_raised; degree--) {
